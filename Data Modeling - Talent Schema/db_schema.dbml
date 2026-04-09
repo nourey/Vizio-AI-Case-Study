@@ -1,0 +1,184 @@
+Project talent_schema {
+  database_type: "PostgreSQL"
+  Note: '''
+  Schema for recruiter-uploaded talent data.
+  Designed for structured candidate records, normalized skills,
+  role preferences, seniority, location/remote preference,
+  compensation expectations, and work authorization.
+  '''
+}
+
+Enum seniority_level {
+  intern
+  junior
+  mid
+  senior
+  staff
+  principal
+  executive
+  unknown
+}
+
+Enum remote_preference_type {
+  remote
+  hybrid
+  onsite
+  flexible
+  unknown
+}
+
+Enum proficiency_level_type {
+  beginner
+  intermediate
+  advanced
+  expert
+  unknown
+}
+
+Enum compensation_period_type {
+  hourly
+  monthly
+  yearly
+  unknown
+}
+
+Table candidates {
+  id uuid [pk]
+  external_candidate_id varchar(100) [note: 'Optional recruiter/source-side identifier']
+  first_name varchar(100)
+  last_name varchar(100)
+  full_name varchar(200)
+  email varchar(255)
+  phone varchar(50)
+  linkedin_url varchar(500)
+  github_url varchar(500)
+  portfolio_url varchar(500)
+
+  current_title varchar(200)
+  professional_summary text
+
+  seniority seniority_level [not null, default: 'unknown']
+
+  current_country varchar(100)
+  current_region varchar(100)
+  current_city varchar(100)
+
+  remote_preference remote_preference_type [not null, default: 'unknown']
+  willing_to_relocate boolean [default: false]
+
+  total_years_experience decimal(4,1)
+  open_to_future_roles boolean [not null, default: true]
+  source_system varchar(100) [note: 'e.g. LinkedIn export, ATS export, CSV upload']
+  source_file_name varchar(255)
+
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    email
+    full_name
+    seniority
+    current_country
+    current_city
+    remote_preference
+  }
+}
+
+Table skills {
+  id uuid [pk]
+  canonical_name varchar(150) [not null, unique]
+  skill_category varchar(100) [note: 'e.g. programming_language, cloud, orchestration, ml, analytics']
+  created_at timestamp [not null, default: `now()`]
+}
+
+Table candidate_skills {
+  id uuid [pk]
+  candidate_id uuid [not null, ref: > candidates.id]
+  skill_id uuid [not null, ref: > skills.id] 
+
+  proficiency_level proficiency_level_type [not null, default: 'unknown']
+  years_experience decimal(4,1)
+  
+
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    candidate_id
+    skill_id
+    (candidate_id, skill_id) [unique]
+  }
+}
+
+
+
+Table candidate_compensation_expectations {
+  id uuid [pk]
+  candidate_id uuid [not null, ref: > candidates.id]
+
+  currency_code char(3) [not null, note: 'ISO currency code, e.g. USD, EUR, TRY']
+  min_amount decimal(12,2)
+  max_amount decimal(12,2)
+  compensation_period compensation_period_type [not null, default: 'unknown']
+
+  is_negotiable boolean [not null, default: true]
+
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    candidate_id [unique]
+    currency_code
+    compensation_period
+  }
+}
+
+Table candidate_work_authorizations {
+  id uuid [pk]
+  candidate_id uuid [not null, ref: > candidates.id]
+
+  country_code char(2) [not null, note: 'ISO country code, e.g. US, DE, NL']
+  is_authorized boolean [not null, default: false]
+  requires_sponsorship boolean [not null, default: false]
+
+  visa_type varchar(100)
+  authorization_expiry_date date
+
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    candidate_id
+    country_code
+    (candidate_id, country_code) [unique]
+  }
+}
+
+Table job_candidate_scores {
+  job_id varchar(100) [not null]
+  candidate_id uuid [not null, ref: > candidates.id]
+  fit_score decimal(5,2) [not null]
+
+  indexes {
+    job_id
+    candidate_id
+    (job_id, candidate_id) [unique]
+  }
+}
+
+Table roles {
+  id uuid [pk]
+  canonical_name varchar(150) [not null, unique]
+  created_at timestamp [not null, default: `now()`]
+}
+
+Table candidate_role_preferences {
+  id uuid [pk]
+  candidate_id uuid [not null, ref: > candidates.id]
+  role_id uuid [not null, ref: > roles.id]
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    candidate_id
+    role_id
+    (candidate_id, role_id) [unique]
+  }
+}
