@@ -9,7 +9,7 @@ This repository contains five independent sections. Each section lives in its ow
 ### 1. Data Pipeline
 **Folder:** [`Pipeline/`](Pipeline/)
 
-Normalizes raw job postings from three providers — Dice, Naukri, and Reed — into a single canonical schema. Each provider has its own transformer module. A single entry point (`pipeline.py`) loads all three CSVs and outputs a unified DataFrame.
+Normalizes raw job postings from three providers Dice, Naukri, and Reed into a single canonical schema. Each provider has its own transformer module. A single entry point (`pipeline.py`) loads all three CSVs and outputs a unified DataFrame.
 
 - [`pipeline.py`](Pipeline/pipeline.py) — entry point
 - [`dice.py`](Pipeline/dice.py) — Dice transformer
@@ -42,7 +42,7 @@ System design for enriching raw company data from job feeds. Covers primary comp
 ### 4. Hiring Intent Design
 **Folder:** [`Hiring Intent Design/`](Hiring%20Intent%20Design/)
 
-A signal-based model to estimate how actively a company is hiring. Combines job posting signals with external signals to score hiring intent beyond the presence of a job ad.
+A signal based model to estimate how actively a company is hiring. Combines job posting signals with external signals to score hiring intent beyond the presence of a job ad.
 
 - [`Design.md`](Hiring%20Intent%20Design/Design.md)
 
@@ -60,6 +60,6 @@ An MVP design for matching candidates to job postings in two stages: eligibility
 ### 6. RAG Extension
 **Folder:** [`RAG Extension/`](RAG%20Extension/)
 
-System design for extending the matching pipeline with a Retrieval-Augmented Generation layer. Covers what data to index, retrieval strategy, and how RAG complements the structured scoring approach.
+System design for extending the matching pipeline with a Retrieval Augmented Generation layer. Covers what data to index, retrieval strategy, and how RAG complements the structured scoring approach.
 
 - [`System.md`](RAG%20Extension/System.md)
